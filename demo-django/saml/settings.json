@@ -1,6 +1,7 @@
 {
     "strict": true,
-    "debug": true,
+    "debug": false,
+    "allowed_clock_drift": 30,
     "sp": {
         "entityId": "https://<sp_domain>/metadata/",
         "assertionConsumerService": {

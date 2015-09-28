@@ -72,8 +72,9 @@ class OneLogin_Saml2_Settings(object):
         """
         self.__sp_validation_only = sp_validation_only
         self.__paths = {}
-        self.__strict = False
+        self.__strict = True
         self.__debug = False
+        self.__allowed_clock_drift = 30
         self.__sp = {}
         self.__idp = {}
         self.__security = {}
@@ -203,6 +204,8 @@ class OneLogin_Saml2_Settings(object):
                 self.__strict = settings['strict']
             if 'debug' in settings:
                 self.__debug = settings['debug']
+            if 'allowed_clock_drift' in settings:
+                self.__allowed_clock_drift = settings['allowed_clock_drift']
             if 'security' in settings:
                 self.__security = settings['security']
             else:
@@ -761,3 +764,12 @@ class OneLogin_Saml2_Settings(object):
         :rtype: boolean
         """
         return self.__debug
+
+    def get_allowed_clock_drift(self):
+        """
+        Returns the allowed clock drift for timestamps validation of Conditions Elements.
+
+        :returns: Allowed clock drift in seconds
+        :rtype: int
+        """
+        return self.__allowed_clock_drift
