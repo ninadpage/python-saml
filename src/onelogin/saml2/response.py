@@ -119,9 +119,10 @@ class OneLogin_Saml2_Response(object):
                 if not attribute_statement_nodes:
                     raise Exception('There is no AttributeStatement on the Response')
 
-                # Validates Asserion timestamps
-                if not self.validate_timestamps():
-                    raise Exception('Timing issues (please check your clock settings)')
+                # Validates Assertion timestamps
+                timestamps_valid, timestamps_error = self.validate_timestamps()
+                if not timestamps_valid:
+                    raise Exception(timestamps_error)
 
                 encrypted_attributes_nodes = self.__query_assertion('/saml:AttributeStatement/saml:EncryptedAttribute')
                 if encrypted_attributes_nodes:
@@ -366,19 +367,25 @@ class OneLogin_Saml2_Response(object):
         """
         Verifies that the document is valid according to Conditions Element
 
-        :returns: True if the condition is valid, False otherwise
-        :rtype: bool
+        :returns: (True, '') if the condition is valid, (False, error_msg) otherwise
+        :rtype: (bool, str)
         """
         conditions_nodes = self.__query_assertion('/saml:Conditions')
 
         for conditions_node in conditions_nodes:
             nb_attr = conditions_node.get('NotBefore')
             nooa_attr = conditions_node.get('NotOnOrAfter')
-            if nb_attr and OneLogin_Saml2_Utils.parse_SAML_to_time(nb_attr) > OneLogin_Saml2_Utils.now() + OneLogin_Saml2_Constants.ALOWED_CLOCK_DRIFT:
-                return False
-            if nooa_attr and OneLogin_Saml2_Utils.parse_SAML_to_time(nooa_attr) + OneLogin_Saml2_Constants.ALOWED_CLOCK_DRIFT <= OneLogin_Saml2_Utils.now():
-                return False
-        return True
+            nb_attr_time = OneLogin_Saml2_Utils.parse_SAML_to_time(nb_attr)
+            now = OneLogin_Saml2_Utils.now()
+            if nb_attr and nb_attr_time > now + self.__settings.get_allowed_clock_drift():
+                return False, ('There was a problem in validating the response: Current time (%s) is earlier than '
+                               'NotBefore condition (%s)' % (now, nb_attr_time))
+            nooa_attr_time = OneLogin_Saml2_Utils.parse_SAML_to_time(nooa_attr)
+            now = OneLogin_Saml2_Utils.now()
+            if nooa_attr and nooa_attr_time + self.__settings.get_allowed_clock_drift() <= now:
+                return False, ('There was a problem in validating the response: Current time (%s) is later than '
+                               'NotOnOrAfter condition (%s)' % (now, nooa_attr_time))
+        return True, ''
 
     def __query_assertion(self, xpath_expr):
         """
