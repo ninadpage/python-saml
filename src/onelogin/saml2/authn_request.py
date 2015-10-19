@@ -64,13 +64,15 @@ class OneLogin_Saml2_Authn_Request(object):
             if 'displayname' in organization_data[lang] and organization_data[lang]['displayname'] is not None:
                 provider_name_str = 'ProviderName="%s"' % organization_data[lang]['displayname']
 
-        force_authn_str = ''
         if force_authn is True:
             force_authn_str = 'ForceAuthn="true"'
+        else:
+            force_authn_str = 'ForceAuthn="false"'
 
-        is_passive_str = ''
         if is_passive is True:
             is_passive_str = 'IsPassive="true"'
+        else:
+            is_passive_str = 'IsPassive="false"'
 
         requested_authn_context_str = ''
         if 'requestedAuthnContext' in security.keys() and security['requestedAuthnContext'] is not False:
