@@ -577,6 +577,48 @@ class OneLogin_Saml2_Settings(object):
         """
         return self.__security
 
+    def update_settings_from_dict(self, new_settings):
+        """
+        Updates the SP, IdP and security data. Keys not present in new_settings are not modified.
+        If new_settings include idp data, sp_validation_only must be set False before invoking this.
+
+        :param new_settings: Settings dict containing keys which need to be updated
+        :type new_settings: dict
+        """
+        assert isinstance(new_settings, dict)
+
+        sp_data = self.__sp.copy()
+        idp_data = self.__idp.copy()
+        security_data = self.__security.copy()
+        if 'sp' in new_settings:
+            sp_data.update(new_settings['sp'])
+        if 'idp' in new_settings:
+            sp_data.update(new_settings['idp'])
+        if 'security' in new_settings:
+            sp_data.update(new_settings['security'])
+
+        settings = {
+            'sp': sp_data,
+            'idp': idp_data,
+            'security': security_data
+        }
+        errors = self.check_settings(settings)
+
+        if errors:
+            raise OneLogin_Saml2_Error(
+                'Invalid dict settings: %s',
+                OneLogin_Saml2_Error.SETTINGS_INVALID,
+                ','.join(errors)
+            )
+
+        self.__sp = sp_data
+        self.__idp = idp_data
+        self.__security = security_data
+
+        self.format_idp_cert()
+        self.format_sp_cert()
+        self.format_sp_key()
+
     def get_contacts(self):
         """
         Gets contact data.
@@ -773,3 +815,34 @@ class OneLogin_Saml2_Settings(object):
         :rtype: int
         """
         return self.__allowed_clock_drift
+
+    def set_allowed_clock_drift(self, value):
+        """
+        Sets the allowed clock drift for timestamps validation of Conditions Elements.
+
+        :param value: Allowed clock drift in seconds
+        :type value: int
+        """
+        assert isinstance(value, int)
+
+        self.__allowed_clock_drift = value
+
+    def get_sp_validation_only(self):
+        """
+        Returns if the 'SP validation only' mode is active.
+
+        :returns: SP validation only parameter
+        :rtype: boolean
+        """
+        return self.__sp_validation_only
+
+    def set_sp_validation_only(self, value):
+        """
+        Activates or deactivates the 'SP validation only' mode.
+
+        :param value: SP validation only parameter
+        :type value: boolean
+        """
+        assert isinstance(value, bool)
+
+        self.__sp_validation_only = value
