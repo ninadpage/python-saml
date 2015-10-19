@@ -144,10 +144,10 @@ class OneLogin_Saml2_Response(object):
                     raise Exception('%s is not a valid audience for this Response' % sp_entity_id)
 
                 # Checks the issuers
-                issuers = self.get_issuers()
-                for issuer in issuers:
-                    if issuer is None or issuer != idp_entity_id:
-                        raise Exception('Invalid issuer in the Assertion/Response')
+                # issuers = self.get_issuers()
+                # for issuer in issuers:
+                #     if issuer is None or issuer != idp_entity_id:
+                #         raise Exception('Invalid issuer in the Assertion/Response')
 
                 # Checks the session Expiration
                 session_expiration = self.get_session_not_on_or_after()
