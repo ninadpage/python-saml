@@ -593,9 +593,9 @@ class OneLogin_Saml2_Settings(object):
         if 'sp' in new_settings:
             sp_data.update(new_settings['sp'])
         if 'idp' in new_settings:
-            sp_data.update(new_settings['idp'])
+            idp_data.update(new_settings['idp'])
         if 'security' in new_settings:
-            sp_data.update(new_settings['security'])
+            security_data.update(new_settings['security'])
 
         settings = {
             'sp': sp_data,
