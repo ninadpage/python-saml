@@ -14,6 +14,7 @@ from copy import deepcopy
 from lxml import etree
 from defusedxml.lxml import fromstring
 from xml.dom.minidom import Document
+from datetime import datetime
 
 from onelogin.saml2.constants import OneLogin_Saml2_Constants
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
@@ -379,12 +380,14 @@ class OneLogin_Saml2_Response(object):
             now = OneLogin_Saml2_Utils.now()
             if nb_attr and nb_attr_time > now + self.__settings.get_allowed_clock_drift():
                 return False, ('There was a problem in validating the response: Current time (%s) is earlier than '
-                               'NotBefore condition (%s)' % (now, nb_attr_time))
+                               'NotBefore condition (%s)' %
+                               (datetime.fromtimestamp(now), datetime.fromtimestamp(nb_attr_time)))
             nooa_attr_time = OneLogin_Saml2_Utils.parse_SAML_to_time(nooa_attr)
             now = OneLogin_Saml2_Utils.now()
             if nooa_attr and nooa_attr_time + self.__settings.get_allowed_clock_drift() <= now:
                 return False, ('There was a problem in validating the response: Current time (%s) is later than '
-                               'NotOnOrAfter condition (%s)' % (now, nooa_attr_time))
+                               'NotOnOrAfter condition (%s)' %
+                               (datetime.fromtimestamp(now), datetime.fromtimestamp(nooa_attr_time)))
         return True, ''
 
     def __query_assertion(self, xpath_expr):
